@@ -26,3 +26,25 @@ def upload():
     photo.save(filename)
 
     return jsonify({"message": "Recebido com sucesso", "rfid": rfid}), 200
+
+@app.route("/logs", methods=["GET"])
+def logs():
+    logs = []
+    for filename in os.listdir(UPLOAD_FOLDER):
+        if filename.endswith(".jpg"):
+            parts = filename.replace(".jpg", "").split("_")
+            if len(parts) >= 2:
+                rfid = parts[0]
+                timestamp = "_".join(parts[1:])
+                logs.append({"rfid": rfid, "timestamp": timestamp})
+
+    # Ordenar por data (mais recente primeiro)
+    logs.sort(key=lambda x: x["timestamp"], reverse=True)
+
+    # Gerar HTML simples
+    html = "<h1>Registos de Acessos (RFID)</h1><ul>"
+    for log in logs:
+        html += f"<li><strong>UID:</strong> {log['rfid']} | <strong>Hora:</strong> {log['timestamp']}</li>"
+    html += "</ul>"
+
+    return html
